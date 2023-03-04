@@ -3,6 +3,17 @@
 # Description
 This collection of tools were developed for All of Us jupyter notebook environment.
 
+# Setup
+Clone repository in Jupyter Notebook instance using:
+```angular2html
+!git clone https://github.com/nhgritctran/varutils
+```
+Simply import the desired tool afterwards, for example:
+
+```angular2html
+from varutils import clinvartools, hailtools
+```
+
 # Current tools
 
 ## clinvartools
