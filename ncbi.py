@@ -13,8 +13,6 @@ class VariationServices:
         pass
 
     @staticmethod
-    @sleep_and_retry
-    @limits(calls=5, period=1)
     def spdi_to_vcf(spdi, output_type):
         """
         convert one spdi format to information from vcf format
@@ -49,8 +47,6 @@ class VariationServices:
         else:
             print("Invalid output type.")
 
-    @sleep_and_retry
-    @limits(calls=5, period=1)
     def rsid_to_vcf(self, rsid):
         """
         convert one rsid to vcf format (chr:pos:ref:alt)
