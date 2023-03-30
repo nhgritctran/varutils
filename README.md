@@ -26,6 +26,15 @@ Process ClinVar txt output file downloaded from ClinVar and generate variant for
 ### class VariantMapping
 Scan Hail matrix table for variants of interest.
 
+## ncbitools
+
+### class VariationServices
+Utilize Variation Services API from NCBI. 
+
+Current capabilities include mapping variant format spdi to VCF and rsid to VCF. VCF format is chr:position:ref:alt
+
+Method multi_rsid_to_vcf can be used to map multiple rsid (recommended less than 10,000 rsid) to VCF.
+
 # Dependencies
 
 There is no extra dependencies needed besides those that already available on All of Us Researcher Workbench.
