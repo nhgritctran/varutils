@@ -118,20 +118,24 @@ class VariationServices:
         :return: spdi format of all variants of each rsid
         """
         # parse rsid file to list
+        print("Parse input file.")
         with open(rsid_file_path, "r") as rsid_file:
             rsid_list = []
             for line in rsid_file:
                 rsid_list.append(line.rstrip())
         refsnp_list = [int(rsid.replace("rs", "")) for rsid in rsid_list]
         refsnp_list.sort()
+        print("Done!")
+        print()
 
         # read file
         with bz2.BZ2File(bz2_file_path, "rb") as f:
             line_count = 0
             spdi_dict = {}
 
+            print("Start mapping refSNP to SPDI")
             # loop refsnp list
-            for refsnp in refsnp_list:
+            for refsnp in tqdm(refsnp_list):
 
                 # loop dbSNP file and find match
                 for i, line in enumerate(f):
