@@ -4,6 +4,8 @@ from IPython.display import display, clear_output
 from ratelimit import limits, sleep_and_retry
 from tqdm import tqdm
 
+import bz2
+import json
 import os
 import requests
 
@@ -87,8 +89,8 @@ class VariationServices:
 
     def multi_rsid_to_vcf(self, rsid_list):
         """
-        this function is multi-threaded version of rsid_to_vcf
-        :param rsid_list: a list of rsid
+        multi-threaded version of rsid_to_vcf
+        :param rsid_list: a list of rsID
         :return: list of dict {rsid: [variant(s) in vcf format]}
         """
         jobs = []
@@ -106,3 +108,49 @@ class VariationServices:
             result_dicts = [job.result() for job in jobs]
 
         return result_dicts
+
+    def bz2_rsid_to_spdi(self, rsid_file_path, bz2_file_path):
+        """
+        used to convert multiple rsID to spdi format using bz2 dbSNP chromosome data
+        :param rsid_file_path: path to rsID file, should be in txt format, one rsid per line
+        :param bz2_file_path: path to dbSNP bz2 file
+        :return: spdi format of all variants of each rsid
+        """
+        with open(rsid_file_path, "r") as rsid_file:
+            rsid_list = []
+            for line in rsid_file:
+                rsid_list.append(line.rstrip())
+        refsnp_list = [int(rsid.replace("rs", "")) for rsid in rsid_list]
+        refsnp_list.sort()
+
+        with bz2.BZ2File("/Users/tct/Databases/RefSNP20221116/refsnp-chr1.json.bz2", "rb") as f:
+            line_count = 0
+            spdi_dict = {}
+            for refsnp in refsnp_list:
+
+                for i, line in enumerate(f):
+                    if i >= line_count:  # only look at unchecked lines
+                        rs_obj = json.loads(line.decode('utf-8'))
+
+                        if refsnp == rs_obj["refsnp_id"]:
+                            main_obj = rs_obj["primary_snapshot_data"]["placements_with_allele"][0]
+                            assembly_name = main_obj["placement_annot"]["seq_id_traits_by_assembly"][0]["assembly_name"]
+
+                            if "GRCh38" in assembly_name:
+                                alleles = main_obj["primary_snapshot_data"]["placements_with_allele"][0]["alleles"]
+                                spdi = []
+                                for allele in alleles:
+                                    if "=" not in allele["hgvs"]:
+                                        spdi.append(allele["allele"]["spdi"]["seq_id"] \
+                                                    + ":" \
+                                                    + str(allele["allele"]["spdi"]["position"]) \
+                                                    + ":" \
+                                                    + allele["allele"]["spdi"]["deleted_sequence"] \
+                                                    + ":" \
+                                                    + allele["allele"]["spdi"]["inserted_sequence"])
+
+                    line_count += 1
+
+                spdi_dict[f"rs{refsnp}"] = spdi
+
+        return spdi_dict
