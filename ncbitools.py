@@ -109,7 +109,8 @@ class VariationServices:
 
         return result_dicts
 
-    def bz2_rsid_to_spdi(self, rsid_file_path, bz2_file_path):
+    @staticmethod
+    def bz2_rsid_to_spdi(rsid_file_path, bz2_file_path):
         """
         used to convert multiple rsID to spdi format using bz2 dbSNP chromosome data
         :param rsid_file_path: path to rsID file, should be in txt format, one rsid per line
@@ -123,7 +124,7 @@ class VariationServices:
         refsnp_list = [int(rsid.replace("rs", "")) for rsid in rsid_list]
         refsnp_list.sort()
 
-        with bz2.BZ2File("/Users/tct/Databases/RefSNP20221116/refsnp-chr1.json.bz2", "rb") as f:
+        with bz2.BZ2File(bz2_file_path, "rb") as f:
             line_count = 0
             spdi_dict = {}
             for refsnp in refsnp_list:
