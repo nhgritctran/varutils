@@ -110,7 +110,7 @@ class VariationServices:
         return result_dicts
 
     @staticmethod
-    def _parse_dbsnp_bz2_line(rs_obj):
+    def _parse_rs_obj(rs_obj):
         """
         parse data from rs_obj
         :param rs_obj: a line from dbSNP bz2 file
@@ -141,10 +141,10 @@ class VariationServices:
     @staticmethod
     def parse_dbsnp_bz2_file(bz2_file_path):
         with bz2.BZ2File(bz2_file_path, "rb") as f:
+            # WIP
             pass
 
-    @staticmethod
-    def bz2_rsid_to_spdi(rsid_file_path, bz2_file_path):
+    def bz2_rsid_to_spdi(self, rsid_file_path, bz2_file_path):
         """
         used to convert multiple rsID to spdi format using bz2 dbSNP chromosome data
         :param rsid_file_path: path to rsID file, should be in txt format, one rsid per line
@@ -177,27 +177,13 @@ class VariationServices:
                         rs_obj = json.loads(line.decode('utf-8'))
 
                         if refsnp == rs_obj["refsnp_id"]:  # if match found
-                            main_obj = rs_obj["primary_snapshot_data"]["placements_with_allele"][0]
-                            assembly_name = main_obj["placement_annot"]["seq_id_traits_by_assembly"][0]["assembly_name"]
-
-                            if "GRCh38" in assembly_name:  # make sure result is from GRCh38 assembly
-                                alleles = main_obj["primary_snapshot_data"]["placements_with_allele"][0]["alleles"]
-                                spdi = []
-                                for allele in alleles:  # get spdi of variants
-                                    if "=" not in allele["hgvs"]:
-                                        spdi.append(allele["allele"]["spdi"]["seq_id"] \
-                                                    + ":" \
-                                                    + str(allele["allele"]["spdi"]["position"]) \
-                                                    + ":" \
-                                                    + allele["allele"]["spdi"]["deleted_sequence"] \
-                                                    + ":" \
-                                                    + allele["allele"]["spdi"]["inserted_sequence"])
+                            rs_dict = self._parse_rs_obj(rs_obj)
                             line_count += 1
                             break
 
                         else:
                             line_count += 1
 
-                spdi_dict[f"rs{refsnp}"] = spdi
+                spdi_dict[f"rs{refsnp}"] = rs_dict["spdi"]
 
         return spdi_dict
