@@ -142,6 +142,7 @@ class VariationServices:
     def parse_dbsnp_bz2_file(bz2_file_path):
         with bz2.BZ2File(bz2_file_path, "rb") as f:
             # WIP
+
             pass
 
     def bz2_rsid_to_spdi(self, rsid_file_path, bz2_file_path):
