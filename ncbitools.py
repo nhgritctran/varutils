@@ -138,7 +138,7 @@ class VariationServices:
             for refsnp in tqdm(refsnp_list):
 
                 # loop dbSNP file and find match
-                for i, line in enumerate(f):
+                for i, line in tqdm(enumerate(f)):
                     if i >= line_count:  # only look at unchecked lines
                         rs_obj = json.loads(line.decode('utf-8'))
 
