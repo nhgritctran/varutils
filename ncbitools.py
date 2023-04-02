@@ -110,6 +110,40 @@ class VariationServices:
         return result_dicts
 
     @staticmethod
+    def _parse_dbsnp_bz2_line(rs_obj):
+        """
+        parse data from rs_obj
+        :param rs_obj: a line from dbSNP bz2 file
+        :return: dictionary with variant information
+        """
+        # process rs_obj
+        main_obj = rs_obj["primary_snapshot_data"]["placements_with_allele"][0]
+        assembly_name = main_obj["placement_annot"]["seq_id_traits_by_assembly"][0]["assembly_name"]
+        alleles = main_obj["primary_snapshot_data"]["placements_with_allele"][0]["alleles"]
+        spdi = []
+        for allele in alleles:  # get spdi of variants
+            if "=" not in allele["hgvs"]:
+                spdi.append(allele["allele"]["spdi"]["seq_id"] \
+                            + ":" \
+                            + str(allele["allele"]["spdi"]["position"]) \
+                            + ":" \
+                            + allele["allele"]["spdi"]["deleted_sequence"] \
+                            + ":" \
+                            + allele["allele"]["spdi"]["inserted_sequence"])
+
+        # put information into dict
+        rs_dict = {"rsid": rs_obj["refsnp_id"],
+                   "assembly_name": assembly_name,
+                   "spdi": spdi}
+
+        return rs_dict
+
+    @staticmethod
+    def parse_dbsnp_bz2_file(bz2_file_path):
+        with bz2.BZ2File(bz2_file_path, "rb") as f:
+            pass
+
+    @staticmethod
     def bz2_rsid_to_spdi(rsid_file_path, bz2_file_path):
         """
         used to convert multiple rsID to spdi format using bz2 dbSNP chromosome data
