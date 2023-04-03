@@ -94,7 +94,7 @@ class VariationServices:
         :return: list of dict {rsid: [variant(s) in vcf format]}
         """
         jobs = []
-        with ThreadPoolExecutor(max_workers=os.cpu_count() - 1) as executor:
+        with ThreadPoolExecutor(max_workers=(os.cpu_count() - 1) * 2) as executor:
             print("Submitting jobs:")
             for rsid in tqdm(rsid_list):
                 jobs.append(executor.submit(self.rsid_to_vcf,
@@ -138,12 +138,24 @@ class VariationServices:
 
         return rs_dict
 
-    @staticmethod
-    def parse_dbsnp_bz2_file(bz2_file_path):
-        with bz2.BZ2File(bz2_file_path, "rb") as f:
-            # WIP
+    def parse_dbsnp_bz2_file(self, bz2_file_path):
+        jobs = []
+        with ThreadPoolExecutor(max_workers=(os.cpu_count() - 1) * 2) as executor:
+            print("Submitting jobs:")
+            with bz2.BZ2File(bz2_file_path, "rb") as f:
+                for line in f:
+                    rs_obj = json.loads(line.decode('utf-8'))
+                    jobs.append(executor.submit(self._parse_rs_obj, rs_obj))
 
-            pass
+            n = 1
+            for job in as_completed(jobs):
+                clear_output(wait=True)
+                display(f"Completed {n} jobs!")
+                n += 1
+
+            result_dicts = [job.result() for job in jobs]
+
+        return result_dicts
 
     def bz2_rsid_to_spdi(self, rsid_file_path, bz2_file_path):
         """
