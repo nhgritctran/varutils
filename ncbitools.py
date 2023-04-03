@@ -83,7 +83,8 @@ class VariationServices:
         else:
             spdi.append("")
 
-        vcf_dict = {rsid: [self.spdi_to_vcf(s, "var") for s in spdi]}
+        vcf_dict = {"rsid": rsid,
+                    "vcf": [self.spdi_to_vcf(s, "var") for s in spdi]}
 
         return vcf_dict
 
