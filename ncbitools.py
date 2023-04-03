@@ -143,7 +143,7 @@ class VariationServices:
         with ThreadPoolExecutor(max_workers=os.cpu_count()-1) as executor:
             print("Submitting jobs:")
             with bz2.BZ2File(bz2_file_path, "rb") as f:
-                for line in f:
+                for line in tqdm(f):
                     rs_obj = json.loads(line.decode('utf-8'))
                     jobs.append(executor.submit(self._parse_rs_obj, rs_obj))
 
